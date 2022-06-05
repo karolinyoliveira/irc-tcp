@@ -1,0 +1,59 @@
+#ifndef socket_HPP
+#define socket_HPP
+
+#include <iostream>
+#include <cstring>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/time.h>
+#include <termios.h> 
+
+#define MAX_MESSAGE_SIZE 4096
+#define MAX_CONNECTIONS 10
+
+using namespace std;
+
+class Socket
+{
+private:
+    int fileDescriptor;
+    struct sockaddr_in address;
+
+public:
+    // Initializes a socket with specific port and address
+    Socket(string addr, unsigned short port);
+
+    // Closes the file fileDescriptor
+    ~Socket();
+
+    // Sends messages with max size of 4096 chars or multiple small messages
+    static int send(int fd, string msg);
+
+    // Receives a message and prints it to stdout. [Format:"fd": "message"]
+    static string receive(int fd);
+
+    // Binds
+    void bind();
+
+    // Starts listening
+    void listen(int maxConnections);
+
+    // Accepts a connection from a client, returns its fileDescriptor or -1
+    int accept();
+
+    // Connects client to a server
+    void connect();
+
+    // Gets the file fileDescriptor
+    int getfileDescriptor();
+};
+
+/* used to accepted more than 4095 chars from stdin
+ REF:https://stackoverflow.com/questions/39546500/how-to-make-scanf-to-read-more-than-4095-characters-given-as-input */
+int clear_icanon(void);
+
+#endif
