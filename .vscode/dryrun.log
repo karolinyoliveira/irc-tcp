@@ -1,6 +1,0 @@
-make --dry-run --keep-going --print-directory
-make: Entering directory '/home/karolinyoliveiraoziassilva/grad/2022.1/redes/irc-tcp'
-g++ src/server.cpp src/socket/socket.cpp src/changemode.cpp -o server
-g++ src/client.cpp src/socket/socket.cpp src/changemode.cpp -o client
-make: Leaving directory '/home/karolinyoliveiraoziassilva/grad/2022.1/redes/irc-tcp'
- 
