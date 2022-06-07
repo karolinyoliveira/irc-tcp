@@ -1,9 +1,10 @@
 #include "socket/socket.hpp"
+#include "utils/utils.hpp"
 
 int main()
 {
     clear_icanon();
-    Socket s = Socket("127.0.0.1", 3000);
+    Socket s = Socket(8080);
     s.connect();
     int fileDescriptor = s.getfileDescriptor();
 
@@ -12,10 +13,12 @@ int main()
     {
         cout << "> ";
         getline(cin, message);
-        int messages = Socket::send(fileDescriptor, message);
+        if (isCommand(message))
+            execCommand(message);
+            
+        Socket::send(fileDescriptor, message);
 
-        while (messages--)
-            message = Socket::receive(fileDescriptor);
+        message = Socket::receive(fileDescriptor);
     }
 
     return 0;

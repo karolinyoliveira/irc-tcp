@@ -1,9 +1,9 @@
-#include "socket/socket.hpp"
+#include "utils/utils.hpp"
 
 int main()
 {
     clear_icanon();
-    Socket s = Socket("127.0.0.1", 3000);
+    Socket s = Socket(8080);
     s.bind();
     s.listen(MAX_CONNECTIONS);
 
@@ -14,8 +14,10 @@ int main()
     {
         message = Socket::receive(fileDescriptor);
 
-        cout<<"> ";
-        getline(cin,message);
+        cout << "> ";
+        getline(cin, message);
+        if (isCommand(message))
+            execCommand(message);
         Socket::send(fileDescriptor, message);
     }
     return 0;

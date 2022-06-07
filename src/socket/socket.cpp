@@ -1,8 +1,8 @@
 #include "socket.hpp"
 
-Socket::Socket(string addr, unsigned short port)
+Socket::Socket(unsigned short port)
 {
-    this->fileDescriptor = socket(AF_INET, SOCK_STREAM, getprotobyname("tcp")->p_proto); // SOCK_STREAM for TCP
+    this->fileDescriptor = socket(AF_INET, SOCK_STREAM, 0); // SOCK_STREAM for TCP
 
     if (this->fileDescriptor == -1)
     {
@@ -10,23 +10,8 @@ Socket::Socket(string addr, unsigned short port)
     }
 
     this->address.sin_family = AF_INET;
-    this->address.sin_addr.s_addr = inet_addr(addr.c_str());
-    this->address.sin_port = htons(port);
-}
-
-Socket::~Socket()
-{
-    close(this->fileDescriptor);
-}
-
-void Socket::listen(int maxConnections)
-{
-    if (::listen(this->fileDescriptor, maxConnections) == -1)
-    {
-        throw runtime_error("Failed to listen to socket");
-    }
-
-    return;
+    this->address.sin_addr.s_addr = INADDR_ANY;
+    this->address.sin_port = htons(port); // avoid endianness problems
 }
 
 void Socket::bind()
@@ -43,15 +28,31 @@ void Socket::bind()
     }
 }
 
+
+Socket::~Socket()
+{
+    close(this->fileDescriptor);
+}
+
+void Socket::listen(int maxConnections)
+{
+    if (::listen(this->fileDescriptor, maxConnections) == -1)
+    {
+        throw runtime_error("Failed to listen to socket");
+    }
+
+    return;
+}
+
 int Socket::accept()
 {
-    int client_fileDescriptor;
-    struct sockaddr_storage client_address;
-    socklen_t client_address_size = sizeof client_address;
+    int client;
+    struct sockaddr_storage address;
+    socklen_t addressSize = sizeof address;
 
-    client_fileDescriptor = ::accept(this->fileDescriptor, (struct sockaddr *)&client_address, &client_address_size);
+    client = ::accept(this->fileDescriptor, (struct sockaddr *)&address, &addressSize);
 
-    return client_fileDescriptor;
+    return client;
 }
 
 void Socket::connect()
@@ -98,7 +99,7 @@ string Socket::receive(int fileDescriptor)
 {
     char buffer[MAX_MESSAGE_SIZE + 1];
     memset(buffer, 0, MAX_MESSAGE_SIZE);
-    
+
     if (::recv(fileDescriptor, buffer, MAX_MESSAGE_SIZE, 0)<0)
     {
         throw runtime_error("Failed to receive message");

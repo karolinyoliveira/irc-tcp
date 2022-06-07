@@ -9,8 +9,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <sys/time.h>
-#include <termios.h> 
+
 
 #define MAX_MESSAGE_SIZE 4096
 #define MAX_CONNECTIONS 10
@@ -24,8 +23,8 @@ private:
     struct sockaddr_in address;
 
 public:
-    // Initializes a socket with specific port and address
-    Socket(string addr, unsigned short port);
+    // Initializes a socket with specific port and address INADDR_ANY
+    Socket(unsigned short port);
 
     // Closes the file fileDescriptor
     ~Socket();
@@ -36,7 +35,7 @@ public:
     // Receives a message and prints it to stdout. [Format:"fd": "message"]
     static string receive(int fd);
 
-    // Binds
+    // Binds ip address and port to a socket
     void bind();
 
     // Starts listening
