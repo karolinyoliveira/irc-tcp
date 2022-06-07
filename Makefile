@@ -4,7 +4,7 @@ CPP = g++
 RM = rm -f
 CFLAGS = -Wall -Wextra
 ZIP = irc_tcp.zip
-UTILS_OBJ = obj/socket.o obj/commandhandler.o obj/changemode.o
+UTILS_OBJ = obj/socket.o obj/commandhandler.o obj/changemode.o obj/readline.o
 
 # ------------------- # --- DIRETIVAS PRINCIPAIS --- # -------------------- #
 
@@ -19,8 +19,10 @@ compile-client: obj/client.o $(UTILS_OBJ)
 
 # Execução convencional do programa
 run-server:
+	stty -icanon
 	./server
 run-client:
+	stty -icanon
 	./client
 
 # Execução do programa com Valgrind
@@ -39,7 +41,7 @@ clean:
 
 # ----------------------- # --- OBJETIFICAÇÃO --- # ------------------------ #
 
-obj/server.o: src/server.cpp lib/utils.hpp
+obj/server.o: src/server.cpp lib/utils.hpp lib/readline.hpp
 	$(CPP) -c src/server.cpp -o obj/server.o $(CFLAGS)
 
 obj/client.o: src/client.cpp lib/utils.hpp lib/socket.hpp
@@ -53,3 +55,6 @@ obj/commandhandler.o: src/commandhandler.cpp lib/utils.hpp
 
 obj/changemode.o: src/changemode.cpp lib/utils.hpp
 	$(CPP) -c src/changemode.cpp -o obj/changemode.o $(CFLAGS)
+
+obj/readline.o: src/readline.cpp lib/readline.hpp
+	$(CPP) -c src/readline.cpp -o obj/readline.o $(CFLAGS)
