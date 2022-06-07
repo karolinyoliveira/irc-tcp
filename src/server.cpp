@@ -16,11 +16,6 @@ int main() {
         message = Socket::receive(fileDescriptor);
 
         cout << "> ";
-        /* ORIGINAL
-        getline(cin, message);
-        if (isCommand(message))
-            execCommand(message);
-        */
         message = read_line_from_file(stdin);
         if(isCommand(message)){
             execCommand(message);

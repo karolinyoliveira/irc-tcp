@@ -51,8 +51,4 @@ public:
     int getfileDescriptor();
 };
 
-/* used to accepted more than 4095 chars from stdin
- REF:https://stackoverflow.com/questions/39546500/how-to-make-scanf-to-read-more-than-4095-characters-given-as-input */
-int clear_icanon(void);
-
 #endif
