@@ -13,9 +13,10 @@ int main() {
     string message;
     while (true) {
 
+        cout << "> ";
+
         message = Socket::receive(fileDescriptor);
 
-        cout << "> ";
         message = read_line_from_file(stdin);
         if(isCommand(message)){
             execCommand(message);

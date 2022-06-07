@@ -1,5 +1,6 @@
 #include "../lib/socket.hpp"
 #include "../lib/utils.hpp"
+#include "../lib/readline.hpp"
 
 int main()
 {
@@ -12,9 +13,10 @@ int main()
     while (true)
     {
         cout << "> ";
-        getline(cin, message);
-        if (isCommand(message))
+        message = read_line_from_file(stdin);
+        if(isCommand(message)){
             execCommand(message);
+        }
             
         Socket::send(fileDescriptor, message);
 

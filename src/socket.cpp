@@ -1,14 +1,17 @@
 #include "../lib/socket.hpp"
 
-Socket::Socket(unsigned short port)
-{
-    this->fileDescriptor = socket(AF_INET, SOCK_STREAM, 0); // SOCK_STREAM for TCP
+Socket::Socket(unsigned short port) {
 
-    if (this->fileDescriptor == -1)
-    {
+    // Socket creation
+    // AF_INET for IPv4; SOCK_STREAM for TCP; 0 for IP
+    this->fileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
+
+    // Socket error handling
+    if (this->fileDescriptor == -1) {
         throw runtime_error("Failed to create TCP socket");
     }
 
+    // Socket address definition
     this->address.sin_family = AF_INET;
     this->address.sin_addr.s_addr = INADDR_ANY;
     this->address.sin_port = htons(port); // avoid endianness problems

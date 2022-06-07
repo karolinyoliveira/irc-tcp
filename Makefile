@@ -44,7 +44,7 @@ clean:
 obj/server.o: src/server.cpp lib/utils.hpp lib/readline.hpp
 	$(CPP) -c src/server.cpp -o obj/server.o $(CFLAGS)
 
-obj/client.o: src/client.cpp lib/utils.hpp lib/socket.hpp
+obj/client.o: src/client.cpp lib/utils.hpp lib/socket.hpp lib/readline.hpp
 	$(CPP) -c src/client.cpp -o obj/client.o $(CFLAGS)
 
 obj/socket.o: src/socket.cpp lib/socket.hpp
