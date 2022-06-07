@@ -11,6 +11,12 @@ Socket::Socket(unsigned short port) {
         throw runtime_error("Failed to create TCP socket");
     }
 
+    // Configuração do Socket
+    int reuse = 1;
+    if (setsockopt(this->fileDescriptor, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse) == -1) {
+        throw runtime_error("Failed to define socket options");
+    }
+
     // Socket address definition
     this->address.sin_family = AF_INET;
     this->address.sin_addr.s_addr = INADDR_ANY;
@@ -19,12 +25,6 @@ Socket::Socket(unsigned short port) {
 
 void Socket::bind()
 {
-    int reuse = 1;
-    if (setsockopt(this->fileDescriptor, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse) == -1)
-    {
-        throw runtime_error("Failed to define socket options");
-    }
-
     if (::bind(this->fileDescriptor, (struct sockaddr *)&this->address, sizeof(this->address)) == -1)
     {
         throw runtime_error("Failed to bind socket with the given address");
