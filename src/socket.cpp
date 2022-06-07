@@ -1,14 +1,25 @@
 #include "../lib/socket.hpp"
 
-Socket::Socket(unsigned short port)
-{
-    this->fileDescriptor = socket(AF_INET, SOCK_STREAM, 0); // SOCK_STREAM for TCP
+Socket::Socket(unsigned short port) {
 
+    // Socket creation
+    // AF_INET for IPv4; SOCK_STREAM for TCP; 0 for IP
+    this->fileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
+
+    // Socket validation
     if (this->fileDescriptor == -1)
     {
         throw runtime_error("Failed to create TCP socket");
     }
 
+    // Socket configuration
+    int reuse = 1;
+    if (setsockopt(this->fileDescriptor, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse) == -1)
+    {
+        throw runtime_error("Failed to define socket options");
+    }
+
+    // Socket address definition
     this->address.sin_family = AF_INET;
     this->address.sin_addr.s_addr = INADDR_ANY;
     this->address.sin_port = htons(port); // avoid endianness problems
@@ -16,13 +27,7 @@ Socket::Socket(unsigned short port)
 
 void Socket::bind()
 {
-    int reuse = 1;
-    if (setsockopt(this->fileDescriptor, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse) == -1)
-    {
-        throw runtime_error("Failed to define socket options");
-    }
-
-    if (::bind(this->fileDescriptor, (struct sockaddr *)&this->address, sizeof(this->address)) == -1)
+    if (::bind(this->fileDescriptor, (struct sockaddr *)&(this->address), sizeof(this->address)) == -1)
     {
         throw runtime_error("Failed to bind socket with the given address");
     }
@@ -57,7 +62,7 @@ int Socket::accept()
 
 void Socket::connect()
 {
-    if (::connect(this->fileDescriptor, (struct sockaddr *)&this->address, sizeof(this->address)) == -1)
+    if (::connect(this->fileDescriptor, (struct sockaddr *)&(this->address), sizeof(this->address)) == -1)
     {
         throw runtime_error("Failed to connect to socket");
     }
