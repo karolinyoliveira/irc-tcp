@@ -1,25 +1,24 @@
-#include "socket/socket.hpp"
-#include "utils/utils.hpp"
+#include "../lib/utils.hpp"
 
 int main()
 {
     clear_icanon();
     Socket s = Socket(8080);
-    s.connect();
-    int fileDescriptor = s.getfileDescriptor();
+    s.bind();
+    s.listen(MAX_CONNECTIONS);
+
+    int fileDescriptor = s.accept();
 
     string message;
     while (true)
     {
+        message = Socket::receive(fileDescriptor);
+
         cout << "> ";
         getline(cin, message);
         if (isCommand(message))
             execCommand(message);
-            
         Socket::send(fileDescriptor, message);
-
-        message = Socket::receive(fileDescriptor);
     }
-
     return 0;
 }

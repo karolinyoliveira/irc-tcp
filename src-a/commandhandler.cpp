@@ -1,4 +1,6 @@
-#include "utils.hpp"
+#include "../lib/utils.hpp"
+
+#include <string>
 
 bool isCommand(string str)
 {

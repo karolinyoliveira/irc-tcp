@@ -1,6 +1,6 @@
 #ifndef utils_HPP
 #define utils_HPP
-#include "../socket/socket.hpp"
+#include "./socket.hpp"
 
 #include <iostream>
 #include <cstring>
