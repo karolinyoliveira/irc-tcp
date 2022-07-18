@@ -4,7 +4,7 @@ CPP = g++
 RM = rm -f
 CFLAGS = -Wall -Wextra
 ZIP = irc_tcp.zip
-UTILS_OBJ = obj/socket.o obj/commandhandler.o obj/changemode.o obj/readline.o
+UTILS_OBJ = obj/socket.o obj/commandhandler.o obj/changemode.o obj/readline.o obj/channel.o obj/channel_controller.o
 
 # ------------------- # --- DIRETIVAS PRINCIPAIS --- # -------------------- #
 
@@ -58,3 +58,9 @@ obj/changemode.o: src/changemode.cpp lib/utils.hpp
 
 obj/readline.o: src/readline.cpp lib/readline.hpp
 	$(CPP) -c src/readline.cpp -o obj/readline.o $(CFLAGS)
+
+obj/channel.o: src/channel.cpp lib/channel.hpp
+	$(CPP) -c src/channel.cpp -o obj/channel.o $(CFLAGS)
+
+obj/channel_controller.o: src/channel_controller.cpp lib/channel_controller.hpp
+	$(CPP) -c src/channel_controller.cpp -o obj/channel_controller.o $(CFLAGS)
