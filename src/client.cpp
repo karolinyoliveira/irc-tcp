@@ -4,20 +4,21 @@
 
 int main()
 {
-    clear_icanon();
-    Socket s = Socket(8080);
+    signal(SIGINT, sigIntHandler);
+    
+    Socket s = Socket(PORT);
     s.connect();
     int fileDescriptor = s.getfileDescriptor();
 
     string message;
     while (true)
     {
-        cout << "> ";
         message = read_line_from_file(stdin);
-        if(isCommand(message)){
-            execCommand(message);
+        if (isCommand(message))
+        {
+            execCommand(message, fileDescriptor);
         }
-            
+
         Socket::send(fileDescriptor, message);
 
         message = Socket::receive(fileDescriptor);

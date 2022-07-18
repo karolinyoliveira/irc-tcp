@@ -12,7 +12,6 @@ int clear_icanon(void)
     }
 
   settings.c_lflag &= ~ICANON;
-
   result = tcsetattr (STDIN_FILENO, TCSANOW, &settings);
   if (result < 0)
     {

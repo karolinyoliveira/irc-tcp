@@ -7,7 +7,7 @@ bool isCommand(string str)
     return str[0] == '/';
 }
 
-void execCommand(string cmd)
+void execCommand(string cmd, int fileDescriptor)
 {
     switch (cmd[1])
     {
@@ -18,7 +18,7 @@ void execCommand(string cmd)
     }
     case 'p':
     {
-        cout<<"pong"<<endl;
+        Socket::send(fileDescriptor, "pong");
         break;
     }
     case 'q':
@@ -28,7 +28,14 @@ void execCommand(string cmd)
     }
     default:
     {
-        cout<<"Unknown command"<<endl;
+        cout << "Invalid command" << endl;
     }
     }
+}
+
+void sigIntHandler(int sig_num)
+{
+    signal(SIGINT, sigIntHandler);
+    cout << "Invalid command, if you want to leave please run /quit or CRTL+D :)" << endl;
+    fflush(stdout);
 }

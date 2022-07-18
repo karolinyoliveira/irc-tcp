@@ -33,7 +33,6 @@ void Socket::bind()
     }
 }
 
-
 Socket::~Socket()
 {
     close(this->fileDescriptor);

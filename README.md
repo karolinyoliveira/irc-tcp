@@ -1,5 +1,5 @@
 # IRC-TCP
-A Internet Relay Chat-TCP/IP implemented with C++.
+A Internet Relay Chat-TCP/IP implemented with C++ using Ubuntu 20.04 and compiled with g++ version 9.4.0.
 
 ## Contributors
 

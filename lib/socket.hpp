@@ -9,17 +9,19 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-
+#include <sys/time.h>
 
 #define MAX_MESSAGE_SIZE 4096
 #define MAX_CONNECTIONS 10
+#define PORT 8080
 
 using namespace std;
 
 class Socket
 {
 private:
-    int fileDescriptor;
+    fd_set fds;
+    int fileDescriptor; // remove
     struct sockaddr_in address;
 
 public:
