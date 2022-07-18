@@ -1,5 +1,6 @@
 // Dependências
 #include "../lib/channel.hpp"
+#include "../lib/user.hpp"
 #include <string>
 #include <regex>
 using namespace std;
@@ -25,3 +26,18 @@ bool operator< (const Channel &left, const Channel &right){
 }
 
 
+// Junção ao canal.
+void Channel::join(User *user) {
+
+    // Verificação de parâmetro
+    if(user == NULL){
+        throw std::invalid_argument("user must be specified.");
+    }
+
+    // Verificação de canal vazio
+    if(Channel::admin == NULL && Channel::users.size() <= 0){
+        Channel::admin = user;
+    }else{
+        Channel::users.insert(user);
+    }
+}

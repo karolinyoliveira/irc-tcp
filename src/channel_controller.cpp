@@ -1,2 +1,2 @@
 // Dependências
-#include "../lib/channelController.hpp"
+#include "../lib/channel_controller.hpp"

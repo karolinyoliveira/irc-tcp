@@ -3,7 +3,9 @@
 #define CHANNEL_HPP
 
 // Dependências
+#include "./user.hpp"
 #include <string>
+#include <set>
 using namespace std;
 
 /**
@@ -17,6 +19,12 @@ private:
     // Nome do canal
     string name;
 
+    // Usuário administrador
+    User *admin = NULL;
+
+    // Demais usuários
+    set<User *> users;
+
 public:
     
     /**
@@ -29,6 +37,11 @@ public:
     /// Operador de comparação.
     friend bool operator< (const Channel &left, const Channel &right);
 
+    /** 
+     * Pedido de junção ao canal.
+     * @throws std::invalid_argument caso seja informado um ponteiro nulo.
+     */
+    void join(User *user);
 };
 
 #endif
