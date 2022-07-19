@@ -6,6 +6,7 @@
 #include "./user.hpp"
 #include <string>
 #include <map>
+#include <set>
 using namespace std;
 
 /**
@@ -46,14 +47,19 @@ private:
     // Demais usuários
     map<string, ChannelUser *> users;
 
+    // Controle de convites
+    bool invited_only;
+    set<string> invitations;
+
 public:
     
     /**
      * @brief Construtor para um novo objeto de canal.
      * @param name nome do canal segundo as restrições RFC-1459.
+     * @param invited_only indica se o canal é somente para convidados.
      * @throws std::invalid_argument caso o nome não siga a restrições RFC-1459.
      */
-    Channel(string name);
+    Channel(string name, bool invited_only);
 
     /// Operador de comparação.
     friend bool operator< (const Channel &left, const Channel &right);

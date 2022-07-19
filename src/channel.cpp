@@ -25,11 +25,12 @@ void Channel::ChannelUser::unmute() {
 
 
 // Construtor
-Channel::Channel(string name) {
+Channel::Channel(string name, bool invited_only) {
 
     // Validação do nome
     if(regex_match(name, regex("^[&#][^ ,]+$")) == true) {
         Channel::name = name;
+        Channel::invited_only = invited_only;
     }
 
     // Nome inválido
@@ -59,18 +60,45 @@ bool Channel::join(User *user) {
         throw std::invalid_argument("user must be specified.");
     }
 
-    // Verificação de canal vazio
+    // Verificação de canal vazio: atribuição administrativa
     if(Channel::admin == NULL && Channel::users.size() <= 0){
         Channel::admin = user;
-    }else{
-        Channel::users.insert (
-            pair<string, ChannelUser *> (
-                user->get_nickname(), 
-                new ChannelUser(user)
-            )
-        );
+    }
+    
+    // Inserção de usuário comum
+    else {
+
+        // Caso o servidor não se restrinja somente a convidados
+        if(Channel::invited_only == false){
+            
+        }
+
+        // Servidor somente para convidados
+        else {
+
+            // Coleta do nome de usuário
+            string nickname = user->get_nickname();
+
+            // Verifica se o usuário foi convidado
+            set<string>::iterator invitation_iterator;
+            invitation_iterator = Channel::invitations.find(nickname);
+            if(invitation_iterator != Channel::invitations.end()) {
+                Channel::users.insert (
+                    pair<string, ChannelUser *> (
+                        nickname, 
+                        new ChannelUser(user)
+                    )
+                );
+            }
+
+            // Usuário não convidado
+            else {
+                return false;
+            }
+        }
     }
 
+    // Conexão bem-sucedida
     return true;
 }
 
