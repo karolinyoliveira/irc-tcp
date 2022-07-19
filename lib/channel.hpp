@@ -5,7 +5,7 @@
 // Dependências
 #include "./user.hpp"
 #include <string>
-#include <set>
+#include <map>
 using namespace std;
 
 /**
@@ -15,6 +15,27 @@ using namespace std;
  */
 class Channel {
 private:
+
+    /**
+     * @brief Classe interna para um usuário de canal.
+     */
+    class ChannelUser {
+    private:
+
+        // Atributos
+        User *user = NULL;
+        bool muted = false;
+
+    public:
+
+        // Contrutor
+        ChannelUser(User *user);
+
+        // Setters
+        void mute();
+        void unmute();
+
+    };
     
     // Nome do canal
     string name;
@@ -23,7 +44,7 @@ private:
     User *admin = NULL;
 
     // Demais usuários
-    set<User *> users;
+    map<string, ChannelUser *> users;
 
 public:
     
@@ -40,8 +61,36 @@ public:
     /** 
      * Pedido de junção ao canal.
      * @throws std::invalid_argument caso seja informado um ponteiro nulo.
+     * @returns verdadeiro caso seja bem-sucedido.
      */
-    void join(User *user);
+    bool join(User *user);
+
+    /**
+     * @brief Remove um usuário do canal.
+     * 
+     * @param user_nickname apelido do usuário a ser expulso.
+     * @return true caso seja bem-sucedido.
+     * @return false caso o usuário especificado não exista.
+     */
+    bool kick(string user_nickname);
+
+    /**
+     * @brief Silencia um usuário do canal. Não é possível silenciar o administrador.
+     * 
+     * @param user_nickname apelido do usuário a ser silenciado.
+     * @return true caso o usuário tenha sido silenciado com sucesso.
+     * @return false caso o usuário especificado não tenha sido encontrado.
+     */
+    bool mute(string user_nickname);
+
+    /**
+     * @brief Remove o silêncio de um usuário do canal.
+     * 
+     * @param user_nickname apelido do usuário a ter o silêncio removido.
+     * @return true caso o usuário tenha sido modificado com sucesso.
+     * @return false caso o usuário especificado não tenha sido encontrado.
+     */
+    bool unmute(string user_nickname);
 };
 
 #endif

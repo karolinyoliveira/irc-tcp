@@ -13,3 +13,15 @@ User::User(string nickname) {
 bool operator< (const User &left, const User &right){
     return left.nickname.compare(right.nickname);
 }
+
+
+// Retorna o apelido
+string User::get_nickname() {
+    return User::nickname;
+}
+
+
+// Define um novo apelido de usuário
+void User::set_nickname(string nickname){
+    User::nickname = nickname;
+}

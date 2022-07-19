@@ -5,6 +5,7 @@
 #include <regex>
 using namespace std;
 
+
 // Construtor
 Channel::Channel(string name) {
 
@@ -20,6 +21,24 @@ Channel::Channel(string name) {
 }
 
 
+// Construtor da classe interna
+Channel::ChannelUser::ChannelUser(User *user) {
+    Channel::ChannelUser::user = user;
+}
+
+
+// Silencia um usuário do canal
+void Channel::ChannelUser::mute() {
+    Channel::ChannelUser::muted = true;
+}
+
+
+// Remove o silêncio de um usuário do canal
+void Channel::ChannelUser::unmute() {
+    Channel::ChannelUser::muted = false;
+}
+
+
 // Operador comparativo.
 bool operator< (const Channel &left, const Channel &right){
     return left.name.compare(right.name);
@@ -27,7 +46,7 @@ bool operator< (const Channel &left, const Channel &right){
 
 
 // Junção ao canal.
-void Channel::join(User *user) {
+bool Channel::join(User *user) {
 
     // Verificação de parâmetro
     if(user == NULL){
@@ -38,6 +57,59 @@ void Channel::join(User *user) {
     if(Channel::admin == NULL && Channel::users.size() <= 0){
         Channel::admin = user;
     }else{
-        Channel::users.insert(user);
+        Channel::users.insert (
+            pair<string, ChannelUser *> (
+                user->get_nickname(), 
+                new ChannelUser(user)
+            )
+        );
     }
+
+    return true;
 }
+
+
+// Expulsa um usuário
+bool Channel::kick(string user_nickname){
+
+    // Verificação de admin
+    if(Channel::admin != NULL && user_nickname == Channel::admin->get_nickname()){
+        Channel::admin = NULL;
+        return true;
+    }
+
+    // Verificação de usuários comuns
+    map<string, ChannelUser *>::iterator user_iterator;
+    user_iterator = Channel::users.find(user_nickname);
+    if(user_iterator != Channel::users.end()){
+        Channel::users.erase(user_iterator);
+        return true;
+    }
+
+    // Usuário não encontrado
+    return false;
+}
+
+
+// Silencia um usuário do canal
+bool Channel::mute(string user_nickname) {
+    map<string, ChannelUser *>::iterator user_iterator;
+    user_iterator = Channel::users.find(user_nickname);
+    if(user_iterator != Channel::users.end()){
+        user_iterator->second->mute();
+        return true;
+    }
+    return false;
+}
+
+
+// Remove o silêncio de um usuário do canal
+bool Channel::unmute(string user_nickname) {
+    map<string, ChannelUser *>::iterator user_iterator;
+    user_iterator = Channel::users.find(user_nickname);
+    if(user_iterator != Channel::users.end()){
+        user_iterator->second->unmute();
+        return true;
+    }
+    return false;
+}  
