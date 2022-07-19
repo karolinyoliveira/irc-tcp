@@ -4,7 +4,7 @@
 
 // Dependências
 #include "./channel.hpp"
-#include <set>
+#include <map>
 using namespace std;
 
 /**
@@ -14,7 +14,7 @@ class ChannelController {
 private:
     
     // Canais
-    set<Channel *> channels;
+    map<string, Channel *> channels;
 
 public:
     

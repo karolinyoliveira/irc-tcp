@@ -58,6 +58,9 @@ public:
     /// Operador de comparação.
     friend bool operator< (const Channel &left, const Channel &right);
 
+    /// Getter do nome do canal.
+    string get_name();
+
     /** 
      * Pedido de junção ao canal.
      * @throws std::invalid_argument caso seja informado um ponteiro nulo.
