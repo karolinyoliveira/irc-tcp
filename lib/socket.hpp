@@ -20,12 +20,11 @@ using namespace std;
 class Socket
 {
 private:
-    fd_set fds;
     int fileDescriptor; // remove
     struct sockaddr_in address;
 
 public:
-    // Initializes a socket with specific port and address INADDR_ANY
+    // Initializes a client socket with specific port and address INADDR_ANY
     Socket(unsigned short port);
 
     // Closes the file fileDescriptor

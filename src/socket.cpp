@@ -1,7 +1,10 @@
 #include "../lib/socket.hpp"
 
-Socket::Socket(unsigned short port) {
+#define NI_MAXHOST 1025
+#define NI_MAXSERV 32
 
+Socket::Socket(unsigned short port)
+{
     // Socket creation
     // AF_INET for IPv4; SOCK_STREAM for TCP; 0 for IP
     this->fileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
@@ -52,9 +55,17 @@ int Socket::accept()
 {
     int client;
     struct sockaddr_storage address;
-    socklen_t addressSize = sizeof address;
+    socklen_t addrlen = sizeof address;
 
-    client = ::accept(this->fileDescriptor, (struct sockaddr *)&address, &addressSize);
+    client = ::accept(this->fileDescriptor, (struct sockaddr *)&address, &addrlen);
+
+    char host[NI_MAXHOST], port[NI_MAXSERV];
+
+    getnameinfo((struct sockaddr *)&address, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+    char msg[100];
+    snprintf(msg, sizeof(100), "Welcome user from ip %s, your code here is : %s!! \n", client, host);
+    //aqui posso guardar os hosts num map se quiser :)
+    ::send(client, msg, sizeof(msg), 0);
 
     return client;
 }
@@ -104,7 +115,7 @@ string Socket::receive(int fileDescriptor)
     char buffer[MAX_MESSAGE_SIZE + 1];
     memset(buffer, 0, MAX_MESSAGE_SIZE);
 
-    if (::recv(fileDescriptor, buffer, MAX_MESSAGE_SIZE, 0)<0)
+    if (::recv(fileDescriptor, buffer, MAX_MESSAGE_SIZE, 0) < 0)
     {
         throw runtime_error("Failed to receive message");
     }
