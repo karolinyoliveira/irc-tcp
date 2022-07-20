@@ -10,7 +10,7 @@ int main()
     // --- Starting server ---
     Socket s = Socket(PORT);
     s.bind();
-    s.listen(5);
+    s.listen(MAX_CONNECTIONS);
 
     // --- Running server ---
     vector<int> clients(MAX_CLIENTS);
@@ -38,7 +38,7 @@ int main()
         }
 
         // wait indefinitely for activity on any socket (timeout is NULL)
-        ready = select(maxFD++, &fdset, NULL, NULL, NULL);
+        ready = select(maxFD + 1, &fdset, NULL, NULL, NULL);
         if ((ready < 0) && (errno != EINTR))
         {
             printf("Failed to retrieve the number of ready descriptors");
@@ -67,7 +67,8 @@ int main()
             if (FD_ISSET(currFD, &fdset))
             {
 
-                message = read_line_from_file(stdin);
+                message = Socket::receive(currFD);
+
                 if (isCommand(message))
                 {
                     execCommand(message, s.getfileDescriptor()); // talvez seja melhor colocar o switch aqui msm (facilita pra fechar um socket pelo menos)

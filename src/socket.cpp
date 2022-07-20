@@ -63,9 +63,9 @@ int Socket::accept()
 
     getnameinfo((struct sockaddr *)&address, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
     char msg[100];
-    snprintf(msg, sizeof(100), "Welcome user from ip %s, your code here is : %s!! \n", client, host);
+    snprintf(msg, sizeof(char[100]), "Welcome user from ip %s, your code here is : %d!! \n", host, client);
     //aqui posso guardar os hosts num map se quiser :)
-    ::send(client, msg, sizeof(msg), 0);
+    ::send(client, msg, sizeof(char)*100, 0);
 
     return client;
 }
