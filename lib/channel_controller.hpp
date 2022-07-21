@@ -42,7 +42,9 @@ private:
     void connections_thread_logic();
     bool verify_credentials (
         map<int, pair<string *, User *>>::iterator connection_itr, 
-        map<string, Channel *>::iterator *channel_itr
+        map<string, Channel *>::iterator *channel_itr, 
+        bool check_admin, 
+        int currFD
     );
     void messages_thread_logic();
 

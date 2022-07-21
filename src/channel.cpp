@@ -174,3 +174,26 @@ int Channel::whois(string user_nickname) {
     }
     return -1;
 }
+
+
+// Envia uma mensagem a todos os usuários
+void Channel::send_message(string user_nickname, string message) {
+
+    // Mensagem final
+    string full_message = user_nickname + ": " + message;
+
+    // Envia ao admin
+    if(user_nickname != Channel::admin->get_nickname()) {
+        Socket::send(Channel::admin->get_file_descriptor(), full_message);
+    }
+
+    // Envia aos demais usuários
+    map<string, ChannelUser *>::iterator user_iterator;
+    for(
+        user_iterator = Channel::users.begin(); 
+        user_iterator != Channel::users.end(); 
+        ++user_iterator
+    ){
+        Socket::send(user_iterator->second->get_file_descriptor(), full_message);
+    }
+}

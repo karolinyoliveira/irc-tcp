@@ -149,6 +149,14 @@ public:
      * @param user_nickname apelido do usuário a ser verificado.
      */
     int whois(string user_nickname);
+
+    /**
+     * @brief Envia uma mensagem a todos os usuários do canal.
+     * 
+     * @param user_nickname apelido do usuário que está a enviar a mensagem.
+     * @param message corpo da mensagem.
+     */
+    void send_message(string user_nickname, string message);
 };
 
 #endif
