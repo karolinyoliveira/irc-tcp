@@ -30,11 +30,29 @@ private:
     public:
 
         // Contrutor
-        ChannelUser(User *user);
+        ChannelUser(User *user) {
+            this->user = user;
+        }
 
-        // Setters
-        void mute();
-        void unmute();
+        // Retorna se está ou não mutado
+        bool is_muted() {
+            return this->muted;
+        }
+
+        // Retorna o file_descriptor
+        int get_file_descriptor() {
+            return this->user->get_file_descriptor();
+        }
+
+        // Muta o usuário
+        void mute() {
+            this->muted = true;
+        }
+
+        // Desmuta o usuário
+        void unmute() {
+            this->muted = false;
+        }
 
     };
     
@@ -77,9 +95,16 @@ public:
     /**
      * @brief Indica se o usuário especificado é administrador do canal.
      * 
-     * @param user usuário a ser verificado
+     * @param user usuário a ser verificado.
      */
     bool is_admin(User *user);
+
+    /**
+     * @brief Indica se o usuário especificado está mutado.
+     * 
+     * @param user_nickname apelido do usuário a ser verificado.
+     */
+    bool is_muted(string user_nickname);
 
     /**
      * @brief Remove um usuário do canal.
@@ -107,6 +132,31 @@ public:
      * @return false caso o usuário especificado não tenha sido encontrado.
      */
     bool unmute(string user_nickname);
+
+    /**
+     * @brief Convida um usuário para o canal caso o modo +i esteja ativo.
+     * 
+     * @param user_nickname apelido do usuário a ser convidado.
+     * @return true caso o usuário tenha sido convidado com sucesso.
+     * @return false caso o modo +i esteja inativo para o canal.
+     */
+    bool invite(string user_nickname);
+
+    /**
+     * @brief Retorna o file_descriptor do usuário especificado caso encontrado; 
+     * em situação contrária, retorna -1.
+     * 
+     * @param user_nickname apelido do usuário a ser verificado.
+     */
+    int whois(string user_nickname);
+
+    /**
+     * @brief Envia uma mensagem a todos os usuários do canal.
+     * 
+     * @param user_nickname apelido do usuário que está a enviar a mensagem.
+     * @param message corpo da mensagem.
+     */
+    void send_message(string user_nickname, string message);
 };
 
 #endif

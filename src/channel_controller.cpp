@@ -12,10 +12,10 @@ void ChannelController::connections_thread_logic() {
 
     // Para controle dos descritores de arquivo
     int maxFD, currFD, ready;
-    const int server_file_descriptor = ChannelController::server_socket.getfileDescriptor();
+    const int server_file_descriptor = ChannelController::server_socket->getfileDescriptor();
 
     // Para navegação nas conexões
-    map<int, string>::iterator connection_itr;
+    map<int, pair<string *, User *>>::iterator connection_itr;
 
     // Execução enquanto não solicitar finalização
     while(ChannelController::may_exit == false) {
@@ -27,8 +27,8 @@ void ChannelController::connections_thread_logic() {
 
         // Verificação de todas as conexões
         for(
-            connection_itr = ChannelController::connections.begin(), 
-            connection_itr != ChannelController::connections.end(), 
+            connection_itr = ChannelController::connections.begin(); 
+            connection_itr != ChannelController::connections.end(); 
             ++connection_itr
         ){
             // Verifica se permanece conectado
@@ -51,10 +51,67 @@ void ChannelController::connections_thread_logic() {
 
         // Ao finalizar a espera pela preparação do socket do servidor, tenta realizar novas conexões
         if(FD_ISSET(server_file_descriptor, &(ChannelController::fdset))) {
-            currFD = ChannelController::server_socket.accept();
-            ChannelController::connections.insert(pair<int, string>(currFD, ""));
+            currFD = ChannelController::server_socket->accept();
+            ChannelController::connections.insert (
+                pair<int, pair<string *, User *>> (
+                    currFD, 
+                    make_pair<string *, User *>(NULL, NULL)
+                )
+            );
         }
     }
+}
+
+
+// Execução auxiliar para comandos administrativos
+bool ChannelController::verify_credentials (
+    map<int, pair<string *, User *>>::iterator connection_itr, 
+    map<string, Channel *>::iterator *channel_itr, 
+    bool check_admin, 
+    int currFD
+){
+
+    // Dados da conexão
+    string *user_channel = connection_itr->second.first;
+    User *user = connection_itr->second.second;
+
+    // Verificação de conexão
+    if(user_channel != NULL && user != NULL) {
+
+        // Busca pelo canal
+        (*channel_itr) = ChannelController::channels.find(*user_channel);
+        if((*channel_itr) != ChannelController::channels.end()) {
+
+            // Verificação de administração
+            if(check_admin == true) {
+                if((*channel_itr)->second->is_admin(user) == true) {
+                    return true;
+                }
+
+                // Falta de credenciais
+                else {
+                    Socket::send(currFD, "An admin role is needed in order to execute this command\n");
+                }
+            }
+
+            // Sem necessidade de credenciais administrativas
+            else {
+                return true;
+            }
+        }
+
+        // Canal indisponível
+        else {
+            Socket::send(currFD, "Channel not found\n");
+        }
+    }
+
+    // Ausência de conexão estabelecida
+    else {
+        Socket::send(currFD, "User is not connected to a channel\n");
+    }
+
+    return false;
 }
 
 
@@ -63,13 +120,14 @@ void ChannelController::messages_thread_logic() {
 
     // Mensagem e apelido a serem recebidos
     string nickname, message;
-    int str_splitter;
+    long unsigned int str_splitter;
 
     // Descritor de arquivo atual
     int currFD;
 
-    // Para navegação nas conexões
-    map<int, string>::iterator connection_itr;
+    // Para navegação nas conexões e nos canais
+    map<int, pair<string *, User *>>::iterator connection_itr;
+    map<string, Channel *>::iterator channel_itr;
 
     // Para controle de convites
     bool invitation = false;
@@ -79,8 +137,8 @@ void ChannelController::messages_thread_logic() {
 
         // Verificação de todas as conexões
         for(
-            connection_itr = ChannelController::connections.begin(), 
-            connection_itr != ChannelController::connections.end(), 
+            connection_itr = ChannelController::connections.begin(); 
+            connection_itr != ChannelController::connections.end(); 
             ++connection_itr
         ){
             // Verifica se permanece conectado
@@ -94,8 +152,18 @@ void ChannelController::messages_thread_logic() {
                 nickname = message.substr(0, str_splitter - 1);
                 message = message.substr(str_splitter + 1, message.length());
 
+                // Mensagem comum
+                if(message[0] != '/') {
+                    
+                    // Verificação de credenciais e envio da mensagem
+                    if(ChannelController::verify_credentials(connection_itr, &channel_itr, false, currFD) == true) {
+                        channel_itr->second->send_message(nickname, message);
+                    }
+
+                }
+
                 // Execução de comandos
-                if(message[0] == '/') {
+                else {
                     switch(message[1]) {
 
                         // OBS.: /connect, /quit e /nickname implementados no lado do cliente
@@ -119,9 +187,14 @@ void ChannelController::messages_thread_logic() {
                             }
 
                             // Atualização da conexão
-                            connection_itr->second = message;
+                            connection_itr->second.first = new string(message);
+                            if(connection_itr->second.second == NULL) {
+                                connection_itr->second.second = new User(nickname, currFD);
+                            }
+
+                            // Conexão ao canal
                             if( ChannelController::join_channel (
-                                new User(nickname, currFD), 
+                                connection_itr->second.second, 
                                 message, 
                                 invitation
                             ) == true ){
@@ -132,17 +205,92 @@ void ChannelController::messages_thread_logic() {
 
                             break;
                         
+                        // invite
+                        case 'i':
+
+                            // Verificação de credenciais
+                            if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
+
+                                // Apelido do convidado
+                                message = message.substr(message.find(' ') + 1, message.length());
+
+                                // Convite
+                                channel_itr->second->invite(message);
+
+                            }
+
+                            break;
+                        
                         // kick
+                        case 'k':
+
+                            // Verificação de credenciais
+                            if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
+
+                                // Apelido do usuário a ser expulso
+                                message = message.substr(message.find(' ') + 1, message.length());
+
+                                // Expulsão
+                                channel_itr->second->kick(message);
+                                
+                            }
+
+                            break;
 
                         // mute
+                        case 'm':
+
+                            // Verificação de credenciais
+                            if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
+
+                                // Apelido do usuário a ser mutado
+                                message = message.substr(message.find(' ') + 1, message.length());
+
+                                // Mute
+                                channel_itr->second->mute(message);
+                                
+                            }
+
+                            break;
 
                         // unmute
+                        case 'u':
+
+                            // Verificação de credenciais
+                            if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
+
+                                // Apelido do usuário a ser desmutado
+                                message = message.substr(message.find(' ') + 1, message.length());
+
+                                // Unmute
+                                channel_itr->second->unmute(message);
+                                
+                            }
+
+                            break;
 
                         // whois
+                        case 'w':
+
+                            // Verificação de credenciais
+                            if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
+
+                                // Apelido do usuário-alvo
+                                message = message.substr(message.find(' ') + 1, message.length());
+
+                                // Obtenção do file_descriptor
+                                message += " is ";
+                                message += channel_itr->second->whois(message);
+                                message += "\n";
+                                Socket::send(currFD, message);
+                                
+                            }
+
+                            break;
                         
                         // Nenhuma correspondência
                         default:
-                            cout << "Invalid command" << endl;
+                            Socket::send(currFD, "Invalid command\n");
                     }
                 }
             } 
@@ -156,18 +304,18 @@ ChannelController::ChannelController(int max_connections) {
 
     // Máximo de conexões
     if(max_connections <= 0){
-        throw std::invalid_argument("max_connections must be equal to or greater than zero.")
+        throw std::invalid_argument("max_connections must be greater than zero.");
     }
     ChannelController::max_connections = max_connections;
 
     // Socket
-    ChannelController::server_socket = Socket(PORT);
-    ChannelController::server_socket.bind();
-    ChannelController::server_socket.listen(max_connections);
+    ChannelController::server_socket = new Socket(PORT);
+    ChannelController::server_socket->bind();
+    ChannelController::server_socket->listen(max_connections);
 
     // Threads
-    ChannelController::connections_thread = (&ChannelController::connections_thread_logic, this);
-    ChannelController::messages_thread = (&ChannelController::messages_thread_logic, this);
+    ChannelController::connections_thread = thread(&ChannelController::connections_thread_logic, this);
+    ChannelController::messages_thread = thread(&ChannelController::messages_thread_logic, this);
 
     // Inicialização das threads
     ChannelController::connections_thread.join();

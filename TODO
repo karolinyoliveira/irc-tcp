@@ -1,0 +1,3 @@
+[] crtl+D pra sair
+[] mensagem no formato remetente: msg (hoje -> server: msg)
+[] clients devem ficar ouvindo enquanto novas msgs chegam (hoje -> client fica no loop envia-recebe)

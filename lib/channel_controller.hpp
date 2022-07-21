@@ -5,6 +5,7 @@
 // Dependências
 #include "./socket.hpp"
 #include "./channel.hpp"
+#include "./user.hpp"
 #include <map>
 #include <thread>
 using namespace std;
@@ -18,13 +19,17 @@ private:
     // Canais
     map<string, Channel *> channels;
 
-    // Conexões <fileDescriptor do usuário, nome do canal ao qual está conectado atualmente>
+    // Controle de conexões
     int max_connections;
-    map<int, string> connections;
     fd_set fdset;
+    /*
+    chave: file_descriptor do usuário
+    valor: par <nome do canal ao qual está conectado, usuário>
+    */
+    map<int, pair<string *, User *>> connections;
 
     // Socket para comunicação
-    Socket server_socket;
+    Socket *server_socket = NULL;
 
     // Controle de threads
     bool may_exit = false;
@@ -35,6 +40,12 @@ private:
 
     // Lógica das threads
     void connections_thread_logic();
+    bool verify_credentials (
+        map<int, pair<string *, User *>>::iterator connection_itr, 
+        map<string, Channel *>::iterator *channel_itr, 
+        bool check_admin, 
+        int currFD
+    );
     void messages_thread_logic();
 
 public:
