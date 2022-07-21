@@ -1,11 +1,19 @@
 // Dependências
 #include "../lib/user.hpp"
+#include "../lib/socket.hpp"
 #include <string>
 using namespace std;
 
 // Construtor
-User::User(string nickname) {
+User::User(string nickname, Socket *socket) {
+    if(socket == NULL) {
+        throw std::invalid_argument("socket must be specified.");
+    }
+    if(nickname.size() > 50) {
+        throw std::invalid_argument("nickname is limited to 50 ASCII characters.");
+    }
     User::nickname = nickname;
+    User::socket = socket;
 }
 
 
@@ -21,7 +29,7 @@ string User::get_nickname() {
 }
 
 
-// Define um novo apelido de usuário
-void User::set_nickname(string nickname){
-    User::nickname = nickname;
+// Retorna o fileDescriptor
+int User::get_file_descriptor() {
+    return User::socket->getfileDescriptor();
 }

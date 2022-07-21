@@ -3,8 +3,10 @@
 #define CHANNEL_CONTROLLER_HPP
 
 // Dependências
+#include "./socket.hpp"
 #include "./channel.hpp"
 #include <map>
+#include <thread>
 using namespace std;
 
 /**
@@ -16,23 +18,48 @@ private:
     // Canais
     map<string, Channel *> channels;
 
+    // Conexões <fileDescriptor do usuário, nome do canal ao qual está conectado atualmente>
+    int max_connections;
+    map<int, string> connections;
+
+    // Socket para comunicação
+    Socket *server_socket = NULL;
+
+    // Controle de threads
+    bool may_exit = false;
+
+    // Threads
+    thread connections_thread;
+    thread messages_thread;
+
+    // Lógica das threads
+    void connections_thread_logic();
+    void messages_thread_logic();
+
 public:
     
     /**
-     * @brief Construtor para um novo objeto controlador.
+     * @brief Construtor para um novo objeto controlador de canais.
+     * @param max_connections quantia global máxima de usuários.
+     * @throws std::invalid_argument caso a quantia de conexões máximas fornecida seja inválida (<= 0).
      */
-    ChannelController();
+    ChannelController(int max_connections);
 
     /**
      * @brief Conecta um usuário ao canal especificado. Caso não exista tal 
      * canal previamente, um novo é criado com base no nome informado.
      * 
+     * @param user ponteiro para o objeto de usuário de canal.
      * @param channel_name nome do canal ao qual conectar.
+     * @param need_invitation indica se o canal precisa ou não de convite.
      * @return true caso a conexão seja bem-sucedida.
      * @return false caso o canal solicitado seja inexistente.
      * @throws std::invalid_argument caso seja informado um ponteiro nulo.
      */
-    bool join_channel(User *user, string channel_name);
+    bool join_channel(User *user, string channel_name, bool need_invitation);
+
+    /// Encerra o controlador.
+    void stop();
 };
 
 #endif

@@ -75,6 +75,13 @@ public:
     bool join(User *user);
 
     /**
+     * @brief Indica se o usuário especificado é administrador do canal.
+     * 
+     * @param user usuário a ser verificado
+     */
+    bool is_admin(User *user);
+
+    /**
      * @brief Remove um usuário do canal.
      * 
      * @param user_nickname apelido do usuário a ser expulso.
