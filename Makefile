@@ -2,7 +2,7 @@
 
 CPP = g++
 RM = rm -f
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra 
 ZIP = irc_tcp.zip
 UTILS_OBJ = obj/socket.o obj/commandhandler.o obj/changemode.o obj/readline.o obj/channel.o obj/channel_controller.o
 
@@ -15,7 +15,7 @@ all: compile-server compile-client
 compile-server: obj/server.o $(UTILS_OBJ)
 	$(CPP) -I lib/ obj/server.o $(UTILS_OBJ) -o server
 compile-client: obj/client.o $(UTILS_OBJ)
-	$(CPP) -I lib/ obj/client.o $(UTILS_OBJ) -o client
+	$(CPP) -I lib/ obj/client.o $(UTILS_OBJ) -lpthread -o  client
 
 # Execução convencional do programa
 run-server:

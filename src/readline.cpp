@@ -19,7 +19,6 @@ string read_line_from_file(FILE *source)
     // EXCEÇÃO: ponteiro vazio
     if (!source)
         return NULL;
-    printf("> ");
 
     // Variáveis locais
     string output;

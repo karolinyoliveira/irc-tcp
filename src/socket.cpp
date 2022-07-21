@@ -119,8 +119,6 @@ string Socket::receive(int fileDescriptor)
     {
         throw runtime_error("Failed to receive message");
     }
-
-    cout << fileDescriptor << ": " << buffer << endl;
     return string(buffer);
 }
 

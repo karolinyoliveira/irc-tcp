@@ -78,7 +78,10 @@ int main()
                     for (int i = 0; i < MAX_CLIENTS; i++)
                     {
                         if (clients[i] != 0 && clients[i] != currFD)
+                        {
                             Socket::send(clients[i], message);
+                            Socket::send(clients[i], to_string(currFD));
+                        }
                     }
                 }
             }
