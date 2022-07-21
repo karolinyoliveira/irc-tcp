@@ -19,9 +19,3 @@ bool operator< (const User &left, const User &right){
 string User::get_nickname() {
     return User::nickname;
 }
-
-
-// Define um novo apelido de usuário
-void User::set_nickname(string nickname){
-    User::nickname = nickname;
-}

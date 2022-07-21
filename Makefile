@@ -4,7 +4,7 @@ CPP = g++
 RM = rm -f
 CFLAGS = -Wall -Wextra
 ZIP = irc_tcp.zip
-UTILS_OBJ = obj/socket.o obj/commandhandler.o obj/changemode.o obj/readline.o obj/channel.o obj/channel_controller.o
+UTILS_OBJ = obj/socket.o obj/commandhandler.o obj/changemode.o obj/readline.o obj/channel.o obj/channel_controller.o obj/user.o
 
 # ------------------- # --- DIRETIVAS PRINCIPAIS --- # -------------------- #
 

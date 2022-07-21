@@ -80,8 +80,7 @@ bool Channel::join(User *user) {
             string nickname = user->get_nickname();
 
             // Verifica se o usuário foi convidado
-            set<string>::iterator invitation_iterator;
-            invitation_iterator = Channel::invitations.find(nickname);
+            set<string>::iterator invitation_iterator = Channel::invitations.find(nickname);
             if(invitation_iterator != Channel::invitations.end()) {
                 Channel::users.insert (
                     pair<string, ChannelUser *> (
@@ -113,8 +112,7 @@ bool Channel::kick(string user_nickname){
     }
 
     // Verificação de usuários comuns
-    map<string, ChannelUser *>::iterator user_iterator;
-    user_iterator = Channel::users.find(user_nickname);
+    map<string, ChannelUser *>::iterator user_iterator = Channel::users.find(user_nickname);
     if(user_iterator != Channel::users.end()){
         Channel::users.erase(user_iterator);
         return true;
@@ -127,8 +125,7 @@ bool Channel::kick(string user_nickname){
 
 // Silencia um usuário do canal
 bool Channel::mute(string user_nickname) {
-    map<string, ChannelUser *>::iterator user_iterator;
-    user_iterator = Channel::users.find(user_nickname);
+    map<string, ChannelUser *>::iterator user_iterator = Channel::users.find(user_nickname);
     if(user_iterator != Channel::users.end()){
         user_iterator->second->mute();
         return true;
@@ -139,8 +136,7 @@ bool Channel::mute(string user_nickname) {
 
 // Remove o silêncio de um usuário do canal
 bool Channel::unmute(string user_nickname) {
-    map<string, ChannelUser *>::iterator user_iterator;
-    user_iterator = Channel::users.find(user_nickname);
+    map<string, ChannelUser *>::iterator user_iterator = Channel::users.find(user_nickname);
     if(user_iterator != Channel::users.end()){
         user_iterator->second->unmute();
         return true;

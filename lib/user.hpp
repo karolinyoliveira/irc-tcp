@@ -29,9 +29,6 @@ public:
     /// Obtém o apelido do usuário.
     string get_nickname();
 
-    /// Define um novo apelido de usuário.
-    void set_nickname(string nickname);
-
 };
 
 #endif

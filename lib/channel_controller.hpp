@@ -27,12 +27,14 @@ public:
      * @brief Conecta um usuário ao canal especificado. Caso não exista tal 
      * canal previamente, um novo é criado com base no nome informado.
      * 
+     * @param user ponteiro para o objeto de usuário de canal.
      * @param channel_name nome do canal ao qual conectar.
+     * @param need_invitation indica se o canal precisa ou não de convite.
      * @return true caso a conexão seja bem-sucedida.
      * @return false caso o canal solicitado seja inexistente.
      * @throws std::invalid_argument caso seja informado um ponteiro nulo.
      */
-    bool join_channel(User *user, string channel_name);
+    bool join_channel(User *user, string channel_name, bool need_invitation);
 };
 
 #endif

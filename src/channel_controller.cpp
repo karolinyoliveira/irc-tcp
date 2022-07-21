@@ -4,7 +4,7 @@
 using namespace std;
 
 // Junção ao canal
-bool ChannelController::join_channel(User *user, string channel_name) {
+bool ChannelController::join_channel(User *user, string channel_name, bool need_invitation) {
 
     // Verificação paramétrica
     if(user == NULL) {
@@ -20,7 +20,7 @@ bool ChannelController::join_channel(User *user, string channel_name) {
     }
 
     // Cria-se um novo canal
-    Channel *channel = new Channel(channel_name);
+    Channel *channel = new Channel(channel_name, need_invitation);
     channel->join(user);
     ChannelController::channels.insert (
         pair<string, Channel *> (
