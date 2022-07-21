@@ -5,25 +5,6 @@
 #include <regex>
 using namespace std;
 
-
-// Construtor da classe interna
-Channel::ChannelUser::ChannelUser(User *user) {
-    Channel::ChannelUser::user = user;
-}
-
-
-// Silencia um usuário do canal
-void Channel::ChannelUser::mute() {
-    Channel::ChannelUser::muted = true;
-}
-
-
-// Remove o silêncio de um usuário do canal
-void Channel::ChannelUser::unmute() {
-    Channel::ChannelUser::muted = false;
-}
-
-
 // Construtor
 Channel::Channel(string name, bool invited_only) {
 
@@ -118,6 +99,16 @@ bool Channel::is_admin(User *user) {
 }
 
 
+// Verifa se o usuário está mutado
+bool Channel::is_muted(string user_nickname) {
+    map<string, ChannelUser *>::iterator user_iterator = Channel::users.find(user_nickname);
+    if(user_iterator != Channel::users.end()){
+        return user_iterator->second->is_muted();
+    }
+    return false;
+}
+
+
 // Expulsa um usuário
 bool Channel::kick(string user_nickname){
 
@@ -159,3 +150,27 @@ bool Channel::unmute(string user_nickname) {
     }
     return false;
 }  
+
+
+// Convida um usuário para o canal
+bool Channel::invite(string user_nickname) {
+
+    // Caso o modo +i esteja inativo
+    if(Channel::invited_only == false) {
+        return false;
+    }
+    
+    // Adição do convite
+    Channel::invitations.insert(user_nickname);
+    return true;
+}
+
+
+// Retorna o file_descriptor do usuário
+int Channel::whois(string user_nickname) {
+    map<string, ChannelUser *>::iterator user_iterator = Channel::users.find(user_nickname);
+    if(user_iterator != Channel::users.end()){
+        return user_iterator->second->get_file_descriptor();
+    }
+    return -1;
+}

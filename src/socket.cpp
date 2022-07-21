@@ -131,7 +131,7 @@ int Socket::getfileDescriptor()
 string Socket::getAddress() 
 {
     struct in_addr ipAddress = Socket::address.sin_addr;
-    string output;
-    inet_ntop( AF_INET, &ipAddress, output, INET_ADDRSTRLEN );
-    return output;
+    char str[INET_ADDRSTRLEN];
+    inet_ntop( AF_INET, &ipAddress, str, INET_ADDRSTRLEN );
+    return string(str);
 }
