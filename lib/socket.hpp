@@ -31,7 +31,7 @@ public:
     ~Socket();
 
     // Sends messages with max size of 4096 chars or multiple small messages
-    static int send(int fd, string msg);
+    static int send(int fd, string msg, int attempt);
 
     // Receives a message and prints it to stdout. [Format:"sender": "message"]
     static string receive(int fd);

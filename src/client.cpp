@@ -9,21 +9,19 @@ int serverFD;
 
 void listenFromServer()
 {
-    string message, sender;
+    string message;
     while (true)
     {
         mtx.lock();
         message = Socket::receive(serverFD);
-        sender = Socket::receive(serverFD);
-
-        cout << sender << ": " << message << endl;
+        cout << message << endl;
         mtx.unlock();
     }
 }
 
 void Connect()
 {
-    Socket::send(serverFD, "/connect");
+    Socket::send(serverFD, "", 0);
     string message = Socket::receive(serverFD);
     cout << message << endl;
 }
@@ -32,27 +30,37 @@ int main()
 {
     signal(SIGINT, sigIntHandler);
 
-    Socket s = Socket(PORT);
-    s.connect();
-    serverFD = s.getfileDescriptor();
+    // --- Connecting client to server ---
+    cout << "Start chatting with /connect" << endl;
+    string message = read_line_from_file(stdin);
 
-    // --- Running client ---
-    string message;
-
-    // establishes connection with server
-    Connect();
-    thread t1(listenFromServer);
-
-    while (true)
+    if (!(message.compare("/connect")) || message.length() ==9)
     {
-        message = read_line_from_file(stdin);
-        if (isCommand(message))
+        Socket s = Socket(PORT);
+        s.connect();
+        serverFD = s.getfileDescriptor();
+
+        // --- Running client ---
+
+        Connect();
+
+        thread t1(listenFromServer);
+
+        while (true)
         {
-            execCommand(message, serverFD);
+            message = read_line_from_file(stdin);
+            Socket::send(serverFD, message, 0);
+            if (isCommand(message))
+            {
+                message = Socket::receive(serverFD);
+                if (message == "bye")
+                    return 0;
+                cout << message << endl;
+            }
         }
 
-        Socket::send(serverFD, message);
+        return 0;
     }
-
-    return 0;
+    else
+        exit(1);
 }

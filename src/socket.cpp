@@ -64,8 +64,8 @@ int Socket::accept()
     getnameinfo((struct sockaddr *)&address, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
     char msg[100];
     snprintf(msg, sizeof(char[100]), "Welcome user from ip %s, your code here is : %d!! \n", host, client);
-    //aqui posso guardar os hosts num map se quiser :)
-    ::send(client, msg, sizeof(char)*100, 0);
+
+    ::send(client, msg, sizeof(char) * 100, 0);
 
     return client;
 }
@@ -80,10 +80,9 @@ void Socket::connect()
     return;
 }
 
-int Socket::send(int fileDescriptor, string msg)
+int Socket::send(int fileDescriptor, string msg, int attempt)
 {
     int nMessages = 0, bytes;
-
     while (msg.size())
     {
         string substr;
@@ -102,10 +101,8 @@ int Socket::send(int fileDescriptor, string msg)
         bytes = ::send(fileDescriptor, substr.c_str(), substr.size(), 0);
         nMessages++;
 
-        if (bytes == -1)
-        {
-            throw runtime_error("Failed to send message");
-        }
+        if (bytes == -1 && attempt < 5) // retry 5 times
+            send(fileDescriptor, substr.c_str(), attempt + 1);
     }
     return nMessages;
 }
@@ -127,11 +124,10 @@ int Socket::getfileDescriptor()
     return this->fileDescriptor;
 }
 
-
-string Socket::getAddress() 
+string Socket::getAddress()
 {
     struct in_addr ipAddress = Socket::address.sin_addr;
     string output;
-    inet_ntop( AF_INET, &ipAddress, output, INET_ADDRSTRLEN );
+    // inet_ntop( AF_INET, &ipAddress, output, INET_ADDRSTRLEN );
     return output;
 }

@@ -11,6 +11,7 @@ int main()
     Socket s = Socket(PORT);
     s.bind();
     s.listen(MAX_CONNECTIONS);
+    int serverFD = s.getfileDescriptor();
 
     // --- Running server ---
     vector<int> clients(MAX_CLIENTS);
@@ -22,8 +23,8 @@ int main()
     {
         FD_ZERO(&fdset);
 
-        FD_SET(s.getfileDescriptor(), &fdset);
-        maxFD = s.getfileDescriptor();
+        FD_SET(serverFD, &fdset);
+        maxFD = serverFD;
 
         for (int i = 0; i < MAX_CLIENTS; i++)
         {
@@ -45,7 +46,7 @@ int main()
         }
 
         // if the socket of the server is ready, there's a connection attempt
-        if (FD_ISSET(s.getfileDescriptor(), &fdset))
+        if (FD_ISSET(serverFD, &fdset))
         {
             currFD = s.accept();
 
@@ -60,30 +61,51 @@ int main()
             }
         }
 
+        // observing the clients
         for (int i = 0; i < MAX_CLIENTS; i++)
         {
             currFD = clients[i];
 
             if (FD_ISSET(currFD, &fdset))
             {
-
+                int pongFlag = 0;
                 message = Socket::receive(currFD);
 
                 if (isCommand(message))
                 {
-                    execCommand(message, s.getfileDescriptor()); // talvez seja melhor colocar o switch aqui msm (facilita pra fechar um socket pelo menos)
+                    switch (message[1])
+                    {
+                    case 'p':
+                    {
+                        Socket::send(currFD, "pong", 0);
+                        pongFlag++;
+                        break;
+                    }
+                    case 'q':
+                    {
+                        Socket::send(currFD, "bye", 0);
+                        close(currFD);
+                        clients[i] = 0;
+                        break;
+                    }
+                    default:
+                    {
+                        Socket::send(currFD, "invalid command", 0);
+                    }
+                    }
                 }
-                else
+                else if (!pongFlag)
                 {
                     for (int i = 0; i < MAX_CLIENTS; i++)
                     {
+                        string fmtMessage = to_string(currFD) + ": " + message;
                         if (clients[i] != 0 && clients[i] != currFD)
                         {
-                            Socket::send(clients[i], message);
-                            Socket::send(clients[i], to_string(currFD));
+                            Socket::send(clients[i], fmtMessage, 0);
                         }
                     }
                 }
+                pongFlag = 0;
             }
         }
     }
