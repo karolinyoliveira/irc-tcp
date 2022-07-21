@@ -70,6 +70,9 @@ public:
      */
     bool join_channel(User *user, string channel_name, bool need_invitation);
 
+    /// Inicializa o controlador.
+    void start();
+
     /// Encerra o controlador.
     void stop();
 };

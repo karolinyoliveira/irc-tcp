@@ -316,10 +316,6 @@ ChannelController::ChannelController(int max_connections) {
     // Threads
     ChannelController::connections_thread = thread(&ChannelController::connections_thread_logic, this);
     ChannelController::messages_thread = thread(&ChannelController::messages_thread_logic, this);
-
-    // Inicialização das threads
-    ChannelController::connections_thread.join();
-    ChannelController::messages_thread.join();
 }
 
 
@@ -347,6 +343,13 @@ bool ChannelController::join_channel(User *user, string channel_name, bool need_
         )
     );
     return false;
+}
+
+
+// Inicia o controlador
+void ChannelController::start() {
+    ChannelController::connections_thread.join();
+    ChannelController::messages_thread.join();
 }
 
 
