@@ -13,9 +13,9 @@ all: compile-server compile-client
 
 # Produção dos executáveis
 compile-server: obj/server.o $(UTILS_OBJ)
-	$(CPP) -I lib/ obj/server.o $(UTILS_OBJ) -o server
+	$(CPP) -pthread -lpthread -I lib/ obj/server.o $(UTILS_OBJ) -o server
 compile-client: obj/client.o $(UTILS_OBJ)
-	$(CPP) -I lib/ obj/client.o $(UTILS_OBJ) -o client
+	$(CPP) -pthread -lpthread -I lib/ obj/client.o $(UTILS_OBJ) -o client
 
 # Execução convencional do programa
 run-server:
@@ -62,8 +62,8 @@ obj/readline.o: src/readline.cpp lib/readline.hpp
 obj/channel.o: src/channel.cpp lib/channel.hpp lib/user.hpp
 	$(CPP) -c src/channel.cpp -o obj/channel.o $(CFLAGS)
 
-obj/channel_controller.o: src/channel_controller.cpp lib/channel_controller.hpp lib/channel.hpp
+obj/channel_controller.o: src/channel_controller.cpp lib/channel_controller.hpp lib/channel.hpp lib/socket.hpp lib/utils.hpp lib/readline.hpp
 	$(CPP) -c src/channel_controller.cpp -o obj/channel_controller.o $(CFLAGS)
 
-obj/user.o: src/user.cpp lib/user.hpp
+obj/user.o: src/user.cpp lib/user.hpp lib/socket.hpp
 	$(CPP) -c src/user.cpp -o obj/user.o $(CFLAGS)

@@ -68,20 +68,15 @@ bool Channel::join(User *user) {
     // Inserção de usuário comum
     else {
 
-        // Caso o servidor não se restrinja somente a convidados
-        if(Channel::invited_only == false){
-            
-        }
+        // Apelido do usuário
+        string nickname = user->get_nickname();
 
-        // Servidor somente para convidados
-        else {
+        // Verifica se o usuário já existe previamente
+        map<string, ChannelUser *>::iterator user_iterator = Channel::users.find(nickname);
+        if(user_iterator != Channel::users.end()){
 
-            // Coleta do nome de usuário
-            string nickname = user->get_nickname();
-
-            // Verifica se o usuário foi convidado
-            set<string>::iterator invitation_iterator = Channel::invitations.find(nickname);
-            if(invitation_iterator != Channel::invitations.end()) {
+            // Caso o servidor não se restrinja somente a convidados
+            if(Channel::invited_only == false){
                 Channel::users.insert (
                     pair<string, ChannelUser *> (
                         nickname, 
@@ -90,15 +85,36 @@ bool Channel::join(User *user) {
                 );
             }
 
-            // Usuário não convidado
+            // Servidor somente para convidados
             else {
-                return false;
+
+                // Verifica se o usuário foi convidado
+                set<string>::iterator invitation_iterator = Channel::invitations.find(nickname);
+                if(invitation_iterator != Channel::invitations.end()) {
+                    Channel::users.insert (
+                        pair<string, ChannelUser *> (
+                            nickname, 
+                            new ChannelUser(user)
+                        )
+                    );
+                }
+
+                // Usuário não convidado
+                else {
+                    return false;
+                }
             }
         }
     }
 
     // Conexão bem-sucedida
     return true;
+}
+
+
+// Verifa se o usuário é administrador
+bool Channel::is_admin(User *user) {
+    return user->get_file_descriptor() == Channel::admin->get_file_descriptor();
 }
 
 
