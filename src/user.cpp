@@ -2,18 +2,22 @@
 #include "../lib/user.hpp"
 #include "../lib/socket.hpp"
 #include <string>
+#include <regex>
 using namespace std;
 
 // Construtor
-User::User(string nickname, Socket *socket) {
-    if(socket == NULL) {
-        throw std::invalid_argument("socket must be specified.");
+User::User(string nickname, int file_descriptor) {
+    if(file_descriptor <= 0) {
+        throw std::invalid_argument("file_descriptor must be greater than zero.");
     }
     if(nickname.size() > 50) {
         throw std::invalid_argument("nickname is limited to 50 ASCII characters.");
     }
+    if(regex_match(nickname, regex("^[A-Za-z0-9_]+$")) == true){
+        throw std::invalid_argument("nickname is badly formatted");
+    }
     User::nickname = nickname;
-    User::socket = socket;
+    User::file_descriptor = file_descriptor;
 }
 
 
@@ -31,5 +35,5 @@ string User::get_nickname() {
 
 // Retorna o fileDescriptor
 int User::get_file_descriptor() {
-    return User::socket->getfileDescriptor();
+    return User::file_descriptor;
 }

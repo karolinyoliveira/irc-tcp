@@ -21,9 +21,10 @@ private:
     // Conexões <fileDescriptor do usuário, nome do canal ao qual está conectado atualmente>
     int max_connections;
     map<int, string> connections;
+    fd_set fdset;
 
     // Socket para comunicação
-    Socket *server_socket = NULL;
+    Socket server_socket;
 
     // Controle de threads
     bool may_exit = false;

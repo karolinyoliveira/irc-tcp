@@ -1,43 +1,177 @@
 // Dependências
 #include "../lib/channel_controller.hpp"
 #include "../lib/channel.hpp"
+#include "../lib/socket.hpp"
 #include "../lib/utils.hpp"
 #include "../lib/readline.hpp"
+#include <thread>
 using namespace std;
 
 // Lógica da thread de novas conexões
 void ChannelController::connections_thread_logic() {
 
-    // Para controle de conexões
-    fd_set fdset;
+    // Para controle dos descritores de arquivo
     int maxFD, currFD, ready;
+    const int server_file_descriptor = ChannelController::server_socket.getfileDescriptor();
+
+    // Para navegação nas conexões
+    map<int, string>::iterator connection_itr;
 
     // Execução enquanto não solicitar finalização
     while(ChannelController::may_exit == false) {
 
+        // Reinicialização dos descritores de arquivo
+        FD_ZERO(&(ChannelController::fdset));
+        FD_SET(server_file_descriptor, &(ChannelController::fdset));
+        maxFD = server_file_descriptor;
+
+        // Verificação de todas as conexões
+        for(
+            connection_itr = ChannelController::connections.begin(), 
+            connection_itr != ChannelController::connections.end(), 
+            ++connection_itr
+        ){
+            // Verifica se permanece conectado
+            currFD = connection_itr->first;
+            if(currFD){
+                FD_SET(currFD, &(ChannelController::fdset));
+            }
+
+            // Para obter o descritor de maior valor absoluto
+            if(currFD > maxFD){
+                maxFD = currFD;
+            }
+        }
+
+        // Espera pela atividade de quaisquer sockets conectados (sem timeout)
+        ready = select(maxFD + 1, &(ChannelController::fdset), NULL, NULL, NULL);
+        if ((ready < 0) && (errno != EINTR)) {
+            printf("Failed to retrieve the number of ready descriptors");
+        }
+
+        // Ao finalizar a espera pela preparação do socket do servidor, tenta realizar novas conexões
+        if(FD_ISSET(server_file_descriptor, &(ChannelController::fdset))) {
+            currFD = ChannelController::server_socket.accept();
+            ChannelController::connections.insert(pair<int, string>(currFD, ""));
+        }
     }
 }
 
 
 // Lógica da thread de recepção de mensagens
-void ChannelController::connections_thread_logic() {
+void ChannelController::messages_thread_logic() {
 
-    // Mensagem a ser recebida
-    string message;
+    // Mensagem e apelido a serem recebidos
+    string nickname, message;
+    int str_splitter;
+
+    // Descritor de arquivo atual
+    int currFD;
+
+    // Para navegação nas conexões
+    map<int, string>::iterator connection_itr;
+
+    // Para controle de convites
+    bool invitation = false;
     
     // Execução enquanto não solicitar finalização
     while(ChannelController::may_exit == false) {
 
+        // Verificação de todas as conexões
+        for(
+            connection_itr = ChannelController::connections.begin(), 
+            connection_itr != ChannelController::connections.end(), 
+            ++connection_itr
+        ){
+            // Verifica se permanece conectado
+            currFD = connection_itr->first;
+            if(FD_ISSET(currFD, &fdset)) {
+
+                // Aquisição da mensagem
+                // Deve ser formatada como "apelido: mensagem"
+                message = Socket::receive(currFD);
+                str_splitter = message.find(' ');
+                nickname = message.substr(0, str_splitter - 1);
+                message = message.substr(str_splitter + 1, message.length());
+
+                // Execução de comandos
+                if(message[0] == '/') {
+                    switch(message[1]) {
+
+                        // OBS.: /connect, /quit e /nickname implementados no lado do cliente
+
+                        // ping
+                        case 'p':
+                            Socket::send(currFD, "pong");
+                            break;
+                        
+                        // join
+                        case 'j':
+
+                            // Nome do canal
+                            message = message.substr(message.find(' ') + 1, message.length());
+
+                            // Verificação de convite (+i ao final)
+                            str_splitter = message.find(" +i");
+                            if(str_splitter < message.length()){
+                                message = message.substr(0, str_splitter);
+                                invitation = true;
+                            }
+
+                            // Atualização da conexão
+                            connection_itr->second = message;
+                            if( ChannelController::join_channel (
+                                new User(nickname, currFD), 
+                                message, 
+                                invitation
+                            ) == true ){
+                                Socket::send(currFD, "joined channel successfully");
+                            }else{
+                                Socket::send(currFD, "failed to join channel");
+                            }
+
+                            break;
+                        
+                        // kick
+
+                        // mute
+
+                        // unmute
+
+                        // whois
+                        
+                        // Nenhuma correspondência
+                        default:
+                            cout << "Invalid command" << endl;
+                    }
+                }
+            } 
+        }
     }
 }
 
 
 // Construtor
 ChannelController::ChannelController(int max_connections) {
+
+    // Máximo de conexões
     if(max_connections <= 0){
         throw std::invalid_argument("max_connections must be equal to or greater than zero.")
     }
     ChannelController::max_connections = max_connections;
+
+    // Socket
+    ChannelController::server_socket = Socket(PORT);
+    ChannelController::server_socket.bind();
+    ChannelController::server_socket.listen(max_connections);
+
+    // Threads
+    ChannelController::connections_thread = (&ChannelController::connections_thread_logic, this);
+    ChannelController::messages_thread = (&ChannelController::messages_thread_logic, this);
+
+    // Inicialização das threads
+    ChannelController::connections_thread.join();
+    ChannelController::messages_thread.join();
 }
 
 
@@ -52,8 +186,7 @@ bool ChannelController::join_channel(User *user, string channel_name, bool need_
     // Busca pelo canal
     map<string, Channel *>::iterator channel_iterator = ChannelController::channels.find(channel_name);
     if(channel_iterator != ChannelController::channels.end()){
-        channel_iterator->second->join(user);
-        return true;
+        return channel_iterator->second->join(user);
     }
 
     // Cria-se um novo canal

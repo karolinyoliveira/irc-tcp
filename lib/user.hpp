@@ -16,21 +16,21 @@ private:
     // Apelido do usuário
     string nickname;
 
-    // Socket do usuário
-    Socket *socket = NULL;
+    // Descritor de arquivo do socket
+    int file_descriptor;
 
 public:
     
     /**
      * @brief Construtor para um novo objeto de usuário.
      * 
-     * @param nickname apelido do usuário; limitado a 50 caracteres.
-     * @param socket ponteiro para um socket a ser utilizado para conexão.
+     * @param nickname apelido do usuário; limitado a 50 caracteres; validado pelo regex "^[A-Za-z0-9_]+$".
+     * @param file_descriptor descritor de arquivo para o socket de conexão.
      * 
-     * @throw std::invalid_argument caso o apelido informado ultrapasse 50 caracteres.
-     * @throw std::invalid_argument caso o ponteiro informado seja nulo.
+     * @throw std::invalid_argument caso o apelido informado ultrapasse 50 caracteres 
+     * ou esteja mal-formatado, ou caso o file_descriptor informado seja <= 0.
      */
-    User(string nickname, Socket *socket);
+    User(string nickname, int file_descriptor);
 
     /// Operador de comparação.
     friend bool operator< (const User &left, const User &right);

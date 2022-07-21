@@ -50,6 +50,9 @@ public:
 
     // Gets the file fileDescriptor
     int getfileDescriptor();
+
+    // Gets the IPv4 address
+    string getAddress();
 };
 
 #endif
