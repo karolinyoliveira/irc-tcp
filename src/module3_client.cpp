@@ -2,18 +2,22 @@
 #include "../lib/utils.hpp"
 #include "../lib/readline.hpp"
 #include <thread>
+#include <mutex>
 
 // Variáveis globais
 int serverFD;
 thread server_listener;
+mutex mtx;
 
 
 // Escuta o servidor
 void listenFromServer(bool *can_exit) {
     string message;
     while ((*can_exit) == false) {
+        mtx.lock();
         message = Socket::receive(serverFD);
         cout << message << endl;
+        mtx.unlock();
     }
 }
 
