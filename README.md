@@ -30,6 +30,7 @@ make run-server-3
 
 ## Video
 
+https://drive.google.com/file/d/1Javu9WsRw_UrHIcuEzBdBAdjp7GFtQBz/view?usp=sharing
 
 ## References
 
