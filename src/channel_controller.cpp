@@ -158,7 +158,11 @@ void ChannelController::messages_thread_logic() {
                     
                     // Verificação de credenciais e envio da mensagem
                     if(ChannelController::verify_credentials(connection_itr, &channel_itr, false, currFD) == true) {
-                        channel_itr->second->send_message(nickname, message);
+                        if(channel_itr->second->is_muted(nickname) == false) {
+                            channel_itr->second->send_message(nickname, message);
+                        }else{
+                            Socket::send(currFD, "you are muted in this channel", 0);
+                        }
                     }
 
                 }
@@ -168,23 +172,26 @@ void ChannelController::messages_thread_logic() {
                     switch(message[1]) {
 
                         // connect
-                        case 'c':
+                        case 'c': {
                             break;
+                        }
 
                         // quit
-                        case 'q':
+                        case 'q': {
                             Socket::send(currFD, "bye", 0);
                             close(currFD);
                             ChannelController::connections.erase(connection_itr);
                             break;
+                        }
 
                         // ping
-                        case 'p':
+                        case 'p': {
                             Socket::send(currFD, "pong", 0);
                             break;
+                        }
                         
                         // join
-                        case 'j':
+                        case 'j': {
 
                             // Nome do canal
                             message = message.substr(message.find(' ') + 1, message.length());
@@ -214,9 +221,10 @@ void ChannelController::messages_thread_logic() {
                             }
 
                             break;
+                        }
                         
                         // invite
-                        case 'i':
+                        case 'i': {
 
                             // Verificação de credenciais
                             if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
@@ -230,9 +238,10 @@ void ChannelController::messages_thread_logic() {
                             }
 
                             break;
+                        }
                         
                         // kick
-                        case 'k':
+                        case 'k': {
 
                             // Verificação de credenciais
                             if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
@@ -241,14 +250,19 @@ void ChannelController::messages_thread_logic() {
                                 message = message.substr(message.find(' ') + 1, message.length());
 
                                 // Expulsão
-                                channel_itr->second->kick(message);
+                                if(channel_itr->second->kick(message) == true){
+                                    Socket::send(currFD, "kicked user successfully", 0);
+                                }else{
+                                    Socket::send(currFD, "failed to kick user (not found)", 0);
+                                }
                                 
                             }
 
                             break;
+                        }
 
                         // mute
-                        case 'm':
+                        case 'm': {
 
                             // Verificação de credenciais
                             if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
@@ -257,14 +271,19 @@ void ChannelController::messages_thread_logic() {
                                 message = message.substr(message.find(' ') + 1, message.length());
 
                                 // Mute
-                                channel_itr->second->mute(message);
+                                if(channel_itr->second->mute(message) == true){
+                                    Socket::send(currFD, "muted user successfully", 0);
+                                }else{
+                                    Socket::send(currFD, "failed to mute user (not found)", 0);
+                                }
                                 
                             }
 
                             break;
+                        }
 
                         // unmute
-                        case 'u':
+                        case 'u': {
 
                             // Verificação de credenciais
                             if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
@@ -273,14 +292,19 @@ void ChannelController::messages_thread_logic() {
                                 message = message.substr(message.find(' ') + 1, message.length());
 
                                 // Unmute
-                                channel_itr->second->unmute(message);
+                                if(channel_itr->second->unmute(message) == true) {
+                                    Socket::send(currFD, "unmuted user successfully", 0);
+                                }else{
+                                    Socket::send(currFD, "failed to unmute user (not found)", 0);
+                                }
                                 
                             }
 
                             break;
+                        }
 
                         // whois
-                        case 'w':
+                        case 'w': {
 
                             // Verificação de credenciais
                             if(ChannelController::verify_credentials(connection_itr, &channel_itr, true, currFD) == true) {
@@ -289,18 +313,25 @@ void ChannelController::messages_thread_logic() {
                                 message = message.substr(message.find(' ') + 1, message.length());
 
                                 // Obtenção do file_descriptor
-                                message += " is ";
-                                message += channel_itr->second->whois(message);
-                                message += "\n";
-                                Socket::send(currFD, message, 0);
+                                int whois = channel_itr->second->whois(message);
+                                if(whois >= 0) {
+                                    message += " is ";
+                                    message += whois;
+                                    message += "\n";
+                                    Socket::send(currFD, message, 0);
+                                }else{
+                                    Socket::send(currFD, "failed to whois user (not found)", 0);
+                                }
                                 
                             }
 
                             break;
+                        }
                         
                         // Nenhuma correspondência
-                        default:
+                        default: {
                             Socket::send(currFD, "Invalid command\n", 0);
+                        }
                     }
                 }
             } 
