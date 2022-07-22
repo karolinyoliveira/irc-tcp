@@ -23,6 +23,10 @@ Finally, at another terminal (in the same folder) run the command below and star
 ```
 make run-client
 ```
+
+## Video
+
+
 ## References
 
 [1] Sockets Programming C++. <https://www.geeksforgeeks.org/socket-programming-cc/>. Accessed 06/05/22.
