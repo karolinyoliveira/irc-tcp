@@ -184,7 +184,7 @@ void Channel::send_message(string user_nickname, string message) {
 
     // Envia ao admin
     if(user_nickname != Channel::admin->get_nickname()) {
-        Socket::send(Channel::admin->get_file_descriptor(), full_message);
+        Socket::send(Channel::admin->get_file_descriptor(), full_message,0);
     }
 
     // Envia aos demais usuários
@@ -194,6 +194,6 @@ void Channel::send_message(string user_nickname, string message) {
         user_iterator != Channel::users.end(); 
         ++user_iterator
     ){
-        Socket::send(user_iterator->second->get_file_descriptor(), full_message);
+        Socket::send(user_iterator->second->get_file_descriptor(), full_message,0);
     }
 }

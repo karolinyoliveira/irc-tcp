@@ -3,6 +3,13 @@
 #include <vector>
 
 #define MAX_CLIENTS 10
+vector<int> clients(MAX_CLIENTS);
+
+void closeConnection(int fd)
+{
+    Socket::send(fd, "bye", 0);
+    close(fd);
+}
 
 int main()
 {
@@ -14,9 +21,8 @@ int main()
     int serverFD = s.getfileDescriptor();
 
     // --- Running server ---
-    vector<int> clients(MAX_CLIENTS);
     fd_set fdset;
-    int maxFD, currFD, ready;
+    int maxFD, currFD, ready, err;
     string message;
 
     while (true)
@@ -75,22 +81,36 @@ int main()
                 {
                     switch (message[1])
                     {
-                    case 'p':
+                    case 'p': // ping
                     {
-                        Socket::send(currFD, "pong", 0);
+                        err = Socket::send(currFD, "pong", 0);
+                        if (err == -1)
+                        {
+                            closeConnection(clients[i]);
+                            clients[i] = 0;
+                        }
                         pongFlag++;
                         break;
                     }
-                    case 'q':
+                    case 'q': // quit
                     {
-                        Socket::send(currFD, "bye", 0);
-                        close(currFD);
+                        closeConnection(currFD);
+                        if (err == -1)
+                        {
+                            closeConnection(clients[i]);
+                            clients[i] = 0;
+                        }
                         clients[i] = 0;
                         break;
                     }
                     default:
                     {
-                        Socket::send(currFD, "invalid command", 0);
+                        err = Socket::send(currFD, "invalid command", 0);
+                        if (err == -1)
+                        {
+                            closeConnection(clients[i]);
+                            clients[i] = 0;
+                        }
                     }
                     }
                 }
@@ -101,7 +121,12 @@ int main()
                         string fmtMessage = to_string(currFD) + ": " + message;
                         if (clients[i] != 0 && clients[i] != currFD)
                         {
-                            Socket::send(clients[i], fmtMessage, 0);
+                            err = Socket::send(clients[i], fmtMessage, 0);
+                            if (err == -1)
+                            {
+                                closeConnection(clients[i]);
+                                clients[i] = 0;
+                            }
                         }
                     }
                 }
@@ -111,3 +136,4 @@ int main()
     }
     return 0;
 }
+
