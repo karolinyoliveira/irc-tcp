@@ -13,7 +13,6 @@ void closeConnection(int fd)
 
 int main()
 {
-
     // --- Starting server ---
     Socket s = Socket(PORT);
     s.bind();
@@ -95,11 +94,6 @@ int main()
                     case 'q': // quit
                     {
                         closeConnection(currFD);
-                        if (err == -1)
-                        {
-                            closeConnection(clients[i]);
-                            clients[i] = 0;
-                        }
                         clients[i] = 0;
                         break;
                     }
@@ -136,4 +130,3 @@ int main()
     }
     return 0;
 }
-
