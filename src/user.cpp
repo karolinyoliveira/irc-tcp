@@ -13,9 +13,11 @@ User::User(string nickname, int file_descriptor) {
     if(nickname.size() > 50) {
         throw std::invalid_argument("nickname is limited to 50 ASCII characters.");
     }
+    /*
     if(regex_match(nickname, regex("^[A-Za-z0-9_]+$")) == true){
         throw std::invalid_argument("nickname is badly formatted");
     }
+    */
     User::nickname = nickname;
     User::file_descriptor = file_descriptor;
 }

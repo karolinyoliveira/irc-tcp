@@ -9,21 +9,27 @@ UTILS_OBJ = obj/socket.o obj/commandhandler.o obj/changemode.o obj/readline.o ob
 # ------------------- # --- DIRETIVAS PRINCIPAIS --- # -------------------- #
 
 # Global
-all: compile-server compile-client
+all: compile-server compile-client compile-server-3 compile-client-3
 
 # Produção dos executáveis
 compile-server: obj/server.o $(UTILS_OBJ)
 	$(CPP) -pthread -lpthread -I lib/ obj/server.o $(UTILS_OBJ) -o server
 compile-client: obj/client.o $(UTILS_OBJ)
 	$(CPP) -pthread -lpthread -I lib/ obj/client.o $(UTILS_OBJ) -o client
+compile-server-3: obj/module3_server.o $(UTILS_OBJ)
+	$(CPP) -pthread -lpthread -I lib/ obj/module3_server.o $(UTILS_OBJ) -o server3
+compile-client-3: obj/module3_client.o $(UTILS_OBJ)
+	$(CPP) -pthread -lpthread -I lib/ obj/module3_client.o $(UTILS_OBJ) -o client3
 
 # Execução convencional do programa
 run-server:
-	stty -icanon
 	./server
 run-client:
-	stty -icanon
 	./client
+run-server-3:
+	./server3
+run-client-3:
+	./client3
 
 # Execução do programa com Valgrind
 valgrind-server:
@@ -46,6 +52,12 @@ obj/server.o: src/server.cpp lib/utils.hpp lib/readline.hpp
 
 obj/client.o: src/client.cpp lib/utils.hpp lib/socket.hpp lib/readline.hpp
 	$(CPP) -c src/client.cpp -o obj/client.o $(CFLAGS)
+
+obj/module3_server.o: src/module3_server.cpp lib/channel_controller.hpp lib/utils.hpp
+	$(CPP) -c src/module3_server.cpp -o obj/module3_server.o $(CFLAGS)
+
+obj/module3_client.o: src/module3_client.cpp lib/utils.hpp lib/socket.hpp lib/readline.hpp
+	$(CPP) -c src/module3_client.cpp -o obj/module3_client.o $(CFLAGS)
 
 obj/socket.o: src/socket.cpp lib/socket.hpp
 	$(CPP) -c src/socket.cpp -o obj/socket.o $(CFLAGS)

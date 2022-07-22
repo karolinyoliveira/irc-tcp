@@ -9,15 +9,18 @@ using namespace std;
 Channel::Channel(string name, bool invited_only) {
 
     // Validação do nome
+    /*
     if(regex_match(name, regex("^[&#][^ ,]+$")) == true) {
         Channel::name = name;
         Channel::invited_only = invited_only;
     }
-
     // Nome inválido
     else {
         throw std::invalid_argument("Invalid name syntax for RFC-1459.");
     }
+    */
+    Channel::name = name;
+    Channel::invited_only = invited_only;
 }
 
 
@@ -184,7 +187,7 @@ void Channel::send_message(string user_nickname, string message) {
 
     // Envia ao admin
     if(user_nickname != Channel::admin->get_nickname()) {
-        Socket::send(Channel::admin->get_file_descriptor(), full_message,0);
+        Socket::send(Channel::admin->get_file_descriptor(), full_message, 0);
     }
 
     // Envia aos demais usuários
@@ -194,6 +197,6 @@ void Channel::send_message(string user_nickname, string message) {
         user_iterator != Channel::users.end(); 
         ++user_iterator
     ){
-        Socket::send(user_iterator->second->get_file_descriptor(), full_message,0);
+        Socket::send(user_iterator->second->get_file_descriptor(), full_message, 0);
     }
 }
