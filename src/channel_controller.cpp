@@ -148,6 +148,7 @@ void ChannelController::messages_thread_logic() {
                 // Aquisição da mensagem
                 // Deve ser formatada como "apelido: mensagem"
                 message = Socket::receive(currFD);
+                cout << "received < " << message << endl;
                 str_splitter = message.find(' ');
                 nickname = message.substr(0, str_splitter - 1);
                 message = message.substr(str_splitter + 1, message.length());
@@ -166,7 +167,9 @@ void ChannelController::messages_thread_logic() {
                 else {
                     switch(message[1]) {
 
-                        // OBS.: /connect e /nickname implementados no lado do cliente
+                        // connect
+                        case 'c':
+                            break;
 
                         // quit
                         case 'q':
@@ -349,7 +352,7 @@ bool ChannelController::join_channel(User *user, string channel_name, bool need_
             channel
         )
     );
-    return false;
+    return true;
 }
 
 
