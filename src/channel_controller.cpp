@@ -90,7 +90,7 @@ bool ChannelController::verify_credentials (
 
                 // Falta de credenciais
                 else {
-                    Socket::send(currFD, "An admin role is needed in order to execute this command\n");
+                    Socket::send(currFD, "An admin role is needed in order to execute this command\n", 0);
                 }
             }
 
@@ -102,13 +102,13 @@ bool ChannelController::verify_credentials (
 
         // Canal indisponível
         else {
-            Socket::send(currFD, "Channel not found\n");
+            Socket::send(currFD, "Channel not found\n", 0);
         }
     }
 
     // Ausência de conexão estabelecida
     else {
-        Socket::send(currFD, "User is not connected to a channel\n");
+        Socket::send(currFD, "User is not connected to a channel\n", 0);
     }
 
     return false;
@@ -166,11 +166,18 @@ void ChannelController::messages_thread_logic() {
                 else {
                     switch(message[1]) {
 
-                        // OBS.: /connect, /quit e /nickname implementados no lado do cliente
+                        // OBS.: /connect e /nickname implementados no lado do cliente
+
+                        // quit
+                        case 'q':
+                            Socket::send(currFD, "bye", 0);
+                            close(currFD);
+                            ChannelController::connections.erase(connection_itr);
+                            break;
 
                         // ping
                         case 'p':
-                            Socket::send(currFD, "pong");
+                            Socket::send(currFD, "pong", 0);
                             break;
                         
                         // join
@@ -198,9 +205,9 @@ void ChannelController::messages_thread_logic() {
                                 message, 
                                 invitation
                             ) == true ){
-                                Socket::send(currFD, "joined channel successfully");
+                                Socket::send(currFD, "joined channel successfully", 0);
                             }else{
-                                Socket::send(currFD, "failed to join channel");
+                                Socket::send(currFD, "failed to join channel", 0);
                             }
 
                             break;
@@ -282,7 +289,7 @@ void ChannelController::messages_thread_logic() {
                                 message += " is ";
                                 message += channel_itr->second->whois(message);
                                 message += "\n";
-                                Socket::send(currFD, message);
+                                Socket::send(currFD, message, 0);
                                 
                             }
 
@@ -290,7 +297,7 @@ void ChannelController::messages_thread_logic() {
                         
                         // Nenhuma correspondência
                         default:
-                            Socket::send(currFD, "Invalid command\n");
+                            Socket::send(currFD, "Invalid command\n", 0);
                     }
                 }
             } 
