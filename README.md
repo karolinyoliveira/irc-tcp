@@ -22,6 +22,12 @@ Finally, at another terminal (in the same folder) run the command below and star
 make run-client
 ```
 
+For module 3, use 
+```
+make run-client-3
+make run-server-3
+```
+
 ## Video
 
 
